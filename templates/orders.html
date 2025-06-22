@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - E-Commerce Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-list text-primary me-2"></i>My Orders
+        </h2>
+    </div>
+</div>
+
+{% if orders %}
+<div class="row">
+    {% for order in orders %}
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-0">
+                            <i class="fas fa-shopping-bag me-2"></i>Order #{{ order.id }}
+                        </h6>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                            {{ order.status.title() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <small class="text-muted">Order Date</small><br>
+                        <strong>{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Total Amount</small><br>
+                        <strong class="text-primary">{{ order.total_amount|inr }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Status</small><br>
+                        <strong>{{ order.status.title() }}</strong>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.image_url %}
+                                            <img src="{{ url_for('static', filename=item.product.image_url) }}" 
+                                                 class="me-2" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                 alt="{{ item.product.name }}">
+                                        {% else %}
+                                            <div class="bg-light me-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ item.product.name }}</strong><br>
+                                            <small class="text-muted">{{ item.product.category }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.price|inr }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td class="text-end">{{ (item.price * item.quantity)|inr }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-end">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                    {% if order.status == 'pending' %}
+                        <form action="{{ url_for('cancel_order', order_id=order.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('Are you sure you want to cancel this order?')">
+                                <i class="fas fa-times me-1"></i>Cancel Order
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="card">
+            <div class="card-body py-5">
+                <i class="fas fa-shopping-bag fa-4x text-muted mb-4"></i>
+                <h3>No orders yet</h3>
+                <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.8em;
+    padding: 0.5em 0.8em;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Veksha{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('index', category=product.category) }}">{{ product.category }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                {% if product.image_url %}
+                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                         class="card-img-top product-detail-image" 
+                         alt="{{ product.name }}">
+                {% else %}
+                    <div class="product-detail-image-placeholder d-flex align-items-center justify-content-center">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h1 class="card-title h2 mb-3">{{ product.name }}</h1>
+                    
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <span class="h3 text-primary fw-bold">{{ product.price | inr }}</span>
+                        {% if product.stock > 0 %}
+                            <span class="badge bg-success ms-2">In Stock</span>
+                        {% else %}
+                            <span class="badge bg-danger ms-2">Out of Stock</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stock Information -->
+                    <div class="mb-4">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-box me-2"></i>
+                            {% if product.stock > 10 %}
+                                <span class="text-success">Available: {{ product.stock }} units</span>
+                            {% elif product.stock > 0 %}
+                                <span class="text-warning">Only {{ product.stock }} left!</span>
+                            {% else %}
+                                <span class="text-danger">Currently unavailable</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ product.description }}</p>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="mb-4">
+                        <h5>Product Details</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <p class="mb-2"><strong>Category:</strong></p>
+                                <p class="mb-2"><strong>Product ID:</strong></p>
+                                <p class="mb-2"><strong>Added:</strong></p>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-2 text-muted">{{ product.category }}</p>
+                                <p class="mb-2 text-muted">#{{ product.id }}</p>
+                                <p class="mb-2 text-muted">{{ product.created_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        {% if current_user.is_authenticated %}
+                            {% if product.stock > 0 %}
+                                <!-- Add to Cart Form -->
+                                <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}" class="mb-2">
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" 
+                                                   class="form-control" required>
+                                        </div>
+                                        <div class="col-8">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <!-- Buy Now Button -->
+                                <a href="{{ url_for('checkout', product_id=product.id, quantity=1) }}" 
+                                   class="btn btn-success">
+                                    <i class="fas fa-bolt me-2"></i>Buy Now
+                                </a>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-times me-2"></i>Out of Stock
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Share Buttons -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3">Share this product:</h6>
+                        <div class="d-flex gap-2">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" 
+                               target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=Check out {{ product.name }}&url={{ request.url }}" 
+                               target="_blank" class="btn btn-outline-info btn-sm">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://wa.me/?text=Check out {{ product.name }} - {{ request.url }}" 
+                               target="_blank" class="btn btn-outline-success btn-sm">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-5">
+        <h3 class="mb-4">Related Products</h3>
+        <div class="row">
+            {% for related_product in related_products %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card product-card h-100">
+                    {% if related_product.image_url %}
+                        <img src="{{ url_for('static', filename=related_product.image_url) }}" 
+                             class="card-img-top product-image" 
+                             alt="{{ related_product.name }}">
+                    {% else %}
+                        <div class="product-image-placeholder d-flex align-items-center justify-content-center">
+                            <i class="fas fa-image fa-2x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ related_product.name }}</h5>
+                        <p class="card-text text-muted small">{{ related_product.description[:100] }}...</p>
+                        <div class="mt-auto">
+                            <p class="h6 text-primary mb-2">{{ related_product.price | inr }}</p>
+                            <a href="{{ url_for('product_detail', product_id=related_product.id) }}" 
+                               class="btn btn-outline-primary btn-sm w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    
+    .product-detail-image-placeholder {
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        border-radius: 10px;
+    }
+    
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Veksha{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="text-center mb-4">
+            <i class="fas fa-store me-2" style="color: #e94560;"></i>
+            Welcome to Veksha
+        </h1>
+        <p class="text-center text-muted mb-5">Premium Shopping Experience - Discover amazing products at great prices!</p>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" action="{{ url_for('index') }}" class="row g-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text text-white" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" name="search" 
+                                   placeholder="Search products..." 
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" 
+                                        {% if category_filter == category %}selected{% endif %}>
+                                    {{ category }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white;">
+                            <i class="fas fa-search me-1"></i>Search
+                        </button>
+                    </div>
+                </form>
+                
+                {% if search_query or category_filter %}
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">
+                                {% if search_query and category_filter %}
+                                    Showing results for "{{ search_query }}" in {{ category_filter }}
+                                {% elif search_query %}
+                                    Showing results for "{{ search_query }}"
+                                {% elif category_filter %}
+                                    Showing products in {{ category_filter }}
+                                {% endif %}
+                            </span>
+                            <span class="badge ms-2" style="background: #e94560;">{{ products|length }} products</span>
+                        </div>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Grid -->
+<div class="row">
+    {% for product in products %}
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div class="card h-100 product-card">
+            <!-- Clickable Product Image and Title -->
+            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-decoration-none">
+                {% if product.image_url %}
+                    <img src="{{ url_for('static', filename=product.image_url) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                {% else %}
+                    <div class="card-img-top product-image-placeholder d-flex align-items-center justify-content-center">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                {% endif %}
+            </a>
+            
+            <div class="card-body d-flex flex-column">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-decoration-none">
+                    <h5 class="card-title text-dark">{{ product.name }}</h5>
+                </a>
+                <p class="card-text text-muted">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="h5 mb-0" style="color: #e94560;">{{ product.price|inr }}</span>
+                        <span class="badge bg-{% if product.stock > 10 %}success{% elif product.stock > 0 %}warning{% else %}danger{% endif %}">
+                            {% if product.stock > 10 %}In Stock{% elif product.stock > 0 %}Low Stock{% else %}Out of Stock{% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if product.stock > 0 %}
+                            <div class="d-flex flex-column gap-2">
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="post" class="d-flex gap-2">
+                                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm" style="width: 70px;">
+                                    <button type="submit" class="btn btn-sm flex-fill" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white;">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </form>
+                                <a href="{{ url_for('checkout', product_id=product.id, quantity=1) }}" class="btn btn-sm w-100" style="background: #e94560; color: white;">
+                                    <i class="fas fa-bolt me-1"></i>Buy Now
+                                </a>
+                            </div>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm w-100" disabled>
+                                <i class="fas fa-times me-1"></i>Out of Stock
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login to Buy
+                            </a>
+                            <a href="{{ url_for('register') }}" class="btn btn-sm w-100" style="background: #e94560; color: white;">
+                                <i class="fas fa-user-plus me-1"></i>Register Now
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- View Details Button -->
+                    <div class="mt-2">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer text-muted">
+                <small>
+                    <i class="fas fa-tag me-1"></i>{{ product.category }}
+                    {% if product.stock > 0 %}
+                        <span class="float-end">
+                            <i class="fas fa-boxes me-1"></i>{{ product.stock }} left
+                        </span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not products %}
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="card">
+            <div class="card-body py-5">
+                <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                <h3>No products found</h3>
+                <p class="text-muted mb-4">
+                    {% if search_query or category_filter %}
+                        Try adjusting your search terms or category filter.
+                    {% else %}
+                        Check back later for new products!
+                    {% endif %}
+                </p>
+                {% if search_query or category_filter %}
+                    <a href="{{ url_for('index') }}" class="btn" style="background: #e94560; color: white;">
+                        <i class="fas fa-home me-2"></i>View All Products
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4">Why Choose Veksha?</h2>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-shipping-fast fa-3x" style="color: #e94560;"></i>
+        </div>
+        <h5>Fast Shipping</h5>
+        <p class="text-muted">Quick and reliable delivery to your doorstep.</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-shield-alt fa-3x" style="color: #e94560;"></i>
+        </div>
+        <h5>Secure Shopping</h5>
+        <p class="text-muted">Your data is protected with industry-standard security.</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-headset fa-3x" style="color: #e94560;"></i>
+        </div>
+        <h5>24/7 Support</h5>
+        <p class="text-muted">Our customer service team is always here to help.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #dee2e6;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-image-placeholder {
+    height: 200px;
+    background-color: #f8f9fa;
+}
+
+.feature-icon {
+    transition: transform 0.2s;
+}
+
+.feature-icon:hover {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %} 

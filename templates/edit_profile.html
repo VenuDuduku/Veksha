@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Veksha{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <!-- Personal Information -->
+                        <h6 class="fw-bold mb-3 text-primary">
+                            <i class="fas fa-user me-2"></i>Personal Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{ current_user.profile.first_name if current_user.profile else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{ current_user.profile.last_name if current_user.profile else '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ current_user.profile.phone if current_user.profile else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male" {% if current_user.profile and current_user.profile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if current_user.profile and current_user.profile.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if current_user.profile and current_user.profile.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                       value="{{ current_user.profile.date_of_birth.strftime('%Y-%m-%d') if current_user.profile and current_user.profile.date_of_birth else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profile_picture" class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+                                <small class="text-muted">Upload a profile picture (JPG, PNG, GIF)</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Address Information -->
+                        <h6 class="fw-bold mb-3 text-primary">
+                            <i class="fas fa-map-marker-alt me-2"></i>Address Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="address_line1" class="form-label">Address Line 1</label>
+                                <input type="text" class="form-control" id="address_line1" name="address_line1" 
+                                       value="{{ current_user.profile.address_line1 if current_user.profile else '' }}" 
+                                       placeholder="Street address, P.O. box, company name">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="address_line2" class="form-label">Address Line 2</label>
+                                <input type="text" class="form-control" id="address_line2" name="address_line2" 
+                                       value="{{ current_user.profile.address_line2 if current_user.profile else '' }}" 
+                                       placeholder="Apartment, suite, unit, building, floor, etc.">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ current_user.profile.city if current_user.profile else '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="state" class="form-label">State/Province</label>
+                                <input type="text" class="form-control" id="state" name="state" 
+                                       value="{{ current_user.profile.state if current_user.profile else '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="postal_code" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" 
+                                       value="{{ current_user.profile.postal_code if current_user.profile else '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <select class="form-select" id="country" name="country">
+                                    <option value="">Select Country</option>
+                                    <option value="India" {% if current_user.profile and current_user.profile.country == 'India' %}selected{% endif %}>India</option>
+                                    <option value="United States" {% if current_user.profile and current_user.profile.country == 'United States' %}selected{% endif %}>United States</option>
+                                    <option value="United Kingdom" {% if current_user.profile and current_user.profile.country == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
+                                    <option value="Canada" {% if current_user.profile and current_user.profile.country == 'Canada' %}selected{% endif %}>Canada</option>
+                                    <option value="Australia" {% if current_user.profile and current_user.profile.country == 'Australia' %}selected{% endif %}>Australia</option>
+                                    <option value="Germany" {% if current_user.profile and current_user.profile.country == 'Germany' %}selected{% endif %}>Germany</option>
+                                    <option value="France" {% if current_user.profile and current_user.profile.country == 'France' %}selected{% endif %}>France</option>
+                                    <option value="Japan" {% if current_user.profile and current_user.profile.country == 'Japan' %}selected{% endif %}>Japan</option>
+                                    <option value="China" {% if current_user.profile and current_user.profile.country == 'China' %}selected{% endif %}>China</option>
+                                    <option value="Brazil" {% if current_user.profile and current_user.profile.country == 'Brazil' %}selected{% endif %}>Brazil</option>
+                                    <option value="Other" {% if current_user.profile and current_user.profile.country and current_user.profile.country not in ['India', 'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France', 'Japan', 'China', 'Brazil'] %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Account Information (Read-only) -->
+                        <h6 class="fw-bold mb-3 text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Account Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Member Since</label>
+                                <input type="text" class="form-control" value="{{ current_user.created_at.strftime('%B %d, %Y') }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Account Type</label>
+                                <input type="text" class="form-control" value="{% if current_user.is_admin %}Administrator{% else %}Customer{% endif %}" readonly>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview profile picture before upload
+    document.getElementById('profile_picture').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // You can add preview functionality here if needed
+                console.log('Profile picture selected:', file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const phone = document.getElementById('phone').value;
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        
+        if (phone && !phoneRegex.test(phone)) {
+            e.preventDefault();
+            alert('Please enter a valid phone number.');
+            return false;
+        }
+    });
+</script>
+{% endblock %} 

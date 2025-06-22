@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Veksha{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-credit-card me-2" style="color: #e94560;"></i>Checkout
+        </h2>
+    </div>
+</div>
+
+<form method="post">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Order Summary -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        {% if buy_now %}Buy Now - Order Summary{% else %}Cart Order Summary{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if buy_now %}
+                        <!-- Buy Now - Single Product -->
+                        <div class="checkout-item p-3 border-bottom">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    {% if product.image_url %}
+                                        <img src="{{ url_for('static', filename=product.image_url) }}" 
+                                             class="img-fluid rounded" alt="{{ product.name }}">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">{{ product.name }}</h6>
+                                    <small class="text-muted">Quantity: {{ quantity }}</small>
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    <span class="h6">{{ product.price|inr }}</span>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <span class="h6" style="color: #e94560;">{{ (product.price * quantity)|inr }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Cart Items -->
+                        {% for item in cart_items %}
+                        <div class="checkout-item p-3 border-bottom">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    {% if item.product.image_url %}
+                                        <img src="{{ url_for('static', filename=item.product.image_url) }}" 
+                                             class="img-fluid rounded" alt="{{ item.product.name }}">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">{{ item.product.name }}</h6>
+                                    <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    <span class="h6">{{ item.product.price|inr }}</span>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <span class="h6" style="color: #e94560;">{{ (item.product.price * item.quantity)|inr }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shipping-fast me-2"></i>Shipping Address
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="shipping_name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="shipping_name" name="shipping_name" 
+                                   value="{% if current_user.profile %}{{ current_user.profile.first_name }} {{ current_user.profile.last_name }}{% endif %}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="shipping_phone" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="shipping_phone" name="shipping_phone" 
+                                   value="{{ current_user.profile.phone if current_user.profile else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shipping_address_line1" class="form-label">Address Line 1 *</label>
+                        <input type="text" class="form-control" id="shipping_address_line1" name="shipping_address_line1" 
+                               value="{{ current_user.profile.address_line1 if current_user.profile else '' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shipping_address_line2" class="form-label">Address Line 2</label>
+                        <input type="text" class="form-control" id="shipping_address_line2" name="shipping_address_line2" 
+                               value="{{ current_user.profile.address_line2 if current_user.profile else '' }}">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="shipping_city" class="form-label">City *</label>
+                            <input type="text" class="form-control" id="shipping_city" name="shipping_city" 
+                                   value="{{ current_user.profile.city if current_user.profile else '' }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="shipping_state" class="form-label">State/Province *</label>
+                            <input type="text" class="form-control" id="shipping_state" name="shipping_state" 
+                                   value="{{ current_user.profile.state if current_user.profile else '' }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="shipping_postal_code" class="form-label">Postal Code *</label>
+                            <input type="text" class="form-control" id="shipping_postal_code" name="shipping_postal_code" 
+                                   value="{{ current_user.profile.postal_code if current_user.profile else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shipping_country" class="form-label">Country *</label>
+                        <select class="form-select" id="shipping_country" name="shipping_country" required>
+                            <option value="">Select Country</option>
+                            <option value="India" {% if current_user.profile and current_user.profile.country == 'India' %}selected{% endif %}>India</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                            <option value="Japan">Japan</option>
+                            <option value="China">China</option>
+                            <option value="Brazil">Brazil</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Billing Address
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="same_as_shipping" checked>
+                        <label class="form-check-label" for="same_as_shipping">
+                            Same as shipping address
+                        </label>
+                    </div>
+                    
+                    <div id="billing_address_form" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="billing_name" name="billing_name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="billing_phone" name="billing_phone">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="billing_address_line1" class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="billing_address_line1" name="billing_address_line1">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="billing_address_line2" class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="billing_address_line2" name="billing_address_line2">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="billing_city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="billing_city" name="billing_city">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="billing_state" class="form-label">State/Province</label>
+                                <input type="text" class="form-control" id="billing_state" name="billing_state">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="billing_postal_code" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="billing_postal_code" name="billing_postal_code">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="billing_country" class="form-label">Country</label>
+                            <select class="form-select" id="billing_country" name="billing_country">
+                                <option value="">Select Country</option>
+                                <option value="India">India</option>
+                                <option value="United States">United States</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Germany">Germany</option>
+                                <option value="France">France</option>
+                                <option value="Japan">Japan</option>
+                                <option value="China">China</option>
+                                <option value="Brazil">Brazil</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Payment Method
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="cod" value="Cash on Delivery" checked>
+                            <label class="form-check-label" for="cod">
+                                <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery (COD)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="card" value="Credit/Debit Card">
+                            <label class="form-check-label" for="card">
+                                <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="upi" value="UPI">
+                            <label class="form-check-label" for="upi">
+                                <i class="fas fa-mobile-alt me-2"></i>UPI Payment
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="netbanking" value="Net Banking">
+                            <label class="form-check-label" for="netbanking">
+                                <i class="fas fa-university me-2"></i>Net Banking
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Payment Summary -->
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>Payment Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>{{ total|inr }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>₹0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong class="h5" style="color: #e94560;">{{ total|inr }}</strong>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-lg text-white" style="background: #e94560;">
+                            <i class="fas fa-check me-2"></i>
+                            {% if buy_now %}Buy Now{% else %}Place Order{% endif %}
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            By placing this order, you agree to our terms and conditions.
+                        </small>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Your payment information is secure and encrypted.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Information -->
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>Shipping Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Method:</strong> Standard Shipping</p>
+                    <p class="mb-2"><strong>Delivery Time:</strong> 3-5 business days</p>
+                    <p class="mb-0"><strong>Cost:</strong> <span class="text-success">FREE</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.checkout-item {
+    transition: background-color 0.2s;
+}
+
+.checkout-item:hover {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-weight: 500;
+}
+
+.sticky-top {
+    z-index: 1020;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle billing address toggle
+    document.getElementById('same_as_shipping').addEventListener('change', function() {
+        const billingForm = document.getElementById('billing_address_form');
+        if (this.checked) {
+            billingForm.style.display = 'none';
+        } else {
+            billingForm.style.display = 'block';
+        }
+    });
+    
+    // Copy shipping address to billing address
+    document.getElementById('same_as_shipping').addEventListener('change', function() {
+        if (this.checked) {
+            // Copy shipping values to billing
+            document.getElementById('billing_name').value = document.getElementById('shipping_name').value;
+            document.getElementById('billing_phone').value = document.getElementById('shipping_phone').value;
+            document.getElementById('billing_address_line1').value = document.getElementById('shipping_address_line1').value;
+            document.getElementById('billing_address_line2').value = document.getElementById('shipping_address_line2').value;
+            document.getElementById('billing_city').value = document.getElementById('shipping_city').value;
+            document.getElementById('billing_state').value = document.getElementById('shipping_state').value;
+            document.getElementById('billing_postal_code').value = document.getElementById('shipping_postal_code').value;
+            document.getElementById('billing_country').value = document.getElementById('shipping_country').value;
+        }
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const shippingPhone = document.getElementById('shipping_phone').value;
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        
+        if (!phoneRegex.test(shippingPhone)) {
+            e.preventDefault();
+            alert('Please enter a valid shipping phone number.');
+            return false;
+        }
+        
+        if (!document.getElementById('same_as_shipping').checked) {
+            const billingPhone = document.getElementById('billing_phone').value;
+            if (billingPhone && !phoneRegex.test(billingPhone)) {
+                e.preventDefault();
+                alert('Please enter a valid billing phone number.');
+                return false;
+            }
+        }
+    });
+</script>
+{% endblock %} 
