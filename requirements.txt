@@ -1,0 +1,50 @@
+# Flask E-commerce Application Dependencies
+
+# Core Flask Framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Database ORM
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==2.0.21
+
+# User Authentication
+Flask-Login==0.6.3
+
+# Password Hashing
+bcrypt==4.0.1
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# File Upload Handling
+Pillow==10.0.1
+
+# Development and Production Dependencies
+gunicorn==21.2.0
+python-multipart==0.0.6
+
+# Optional: Database Migrations (for production)
+# Flask-Migrate==4.0.5
+
+# Optional: Email Support (for future features)
+# Flask-Mail==0.9.1
+
+# Optional: Payment Processing (for future features)
+# stripe==6.6.0
+
+# Optional: Image Processing (for future features)
+# Pillow==10.0.1
+
+# Optional: Caching (for production)
+# Flask-Caching==2.0.2
+# redis==5.0.0
+
+# Optional: Background Tasks (for production)
+# celery==5.3.1
+
+# Development Tools (optional)
+# pytest==7.4.2
+# pytest-flask==1.2.0
+# black==23.7.0
+# flake8==6.0.0 
