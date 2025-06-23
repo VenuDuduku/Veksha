@@ -226,3 +226,54 @@ If you encounter any issues:
 ---
 
 **Note**: This is a development project. For production use, ensure proper security measures are implemented. 
+
+## 🤔 Troubleshooting
+
+### Error: "no such table"
+
+If you encounter the error "no such table", it means that the tables in your database do not exist. This can happen if the database has not been initialized or migrated before the app starts.
+
+#### Solution:
+
+1. **Ensure Database Initialization on Render**
+
+   On your local machine, the database is created automatically on first run. On Render, you need to make sure the same thing happens.
+
+   - **Option A: Auto-create on App Start**
+     If your `app.py` already creates the database and tables if they don't exist, make sure this code runs on Render as well.  
+     Look for code like:
+     ```python
+     from app import db
+     db.create_all()
+     ```
+     If not present, you should add logic to create tables if they don't exist.
+
+   - **Option B: Use a Startup Command**
+     You can add a command in your `render.yaml` or as a Render "Build Command" to initialize the database before starting the app.
+
+     For example, if you use Flask-Migrate:
+     ```bash
+     flask db upgrade
+     ```
+     Or, for basic SQLAlchemy:
+     ```bash
+     python -c "from app import db; db.create_all()"
+     ```
+
+2. **Check Your Database Path**
+   - If you use SQLite, make sure the path is writable and accessible on Render.
+   - The default path in your `.env` is `sqlite:///ecommerce.db`, but your code may expect it in the `instance/` folder.
+   - On Render, you may need to set `DATABASE_URL=sqlite:///instance/ecommerce.db` and ensure the `instance/` directory exists and is writable.
+
+3. **Review Environment Variables**
+   - Make sure all required environment variables are set in Render's dashboard (especially `DATABASE_URL`).
+
+#### Next Steps
+
+1. **Check your Render logs for the full error message** (especially the lines before/after the snippet you posted).
+2. **Confirm if the database file is being created** in the right place.
+3. **Ensure your app creates tables on first run** (or use a migration tool).
+
+#### If you share your `app.py` database setup code or the full error log, I can give you a more specific fix!
+
+Would you like instructions on how to add auto-creation of tables, or help with configuring your `render.yaml`? 

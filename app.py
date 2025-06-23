@@ -138,6 +138,109 @@ class OrderItem(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Initialize database and create sample data
+def initialize_database():
+    """Initialize database tables and create sample data if needed"""
+    with app.app_context():
+        # Create all tables
+        db.create_all()
+        
+        # Create admin user if not exists
+        admin_username = os.environ.get('ADMIN_USERNAME', 'Veksha')
+        admin_email = os.environ.get('ADMIN_EMAIL', 'veksha@admin.com')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'Lucky1326')
+        
+        admin = User.query.filter_by(username=admin_username).first()
+        if not admin:
+            admin = User()
+            admin.username = admin_username
+            admin.email = admin_email
+            admin.is_admin = True
+            admin.set_password(admin_password)
+            db.session.add(admin)
+            db.session.commit()
+            print(f"Admin user created: username='{admin_username}', password='{admin_password}'")
+        
+        # Add sample products if none exist
+        if Product.query.count() == 0:
+            def create_product(name, description, price, stock, category, image_url):
+                product = Product()
+                product.name = name
+                product.description = description
+                product.price = price
+                product.stock = stock
+                product.category = category
+                product.image_url = image_url
+                return product
+            
+            sample_products = [
+                # Electronics Category (15 products)
+                create_product('Laptop', 'High-performance laptop with Intel i7 processor, 16GB RAM, and 512GB SSD. Perfect for work and gaming.', 74999.00, 10, 'Electronics', 'images/products/laptop.jpg'),
+                create_product('Smartphone', 'Latest smartphone model with 128GB storage, 6.1-inch display, and advanced camera system.', 52499.00, 15, 'Electronics', 'images/products/smartphone.jpg'),
+                create_product('Headphones', 'Wireless noise-canceling headphones with premium sound quality and 30-hour battery life.', 14999.00, 20, 'Electronics', 'images/products/headphones.jpg'),
+                create_product('Tablet', '10.1-inch tablet with 64GB storage, perfect for entertainment and productivity.', 22499.00, 12, 'Electronics', 'images/products/tablet.jpg'),
+                create_product('Smartwatch', 'Fitness tracking smartwatch with heart rate monitor and GPS.', 8999.00, 25, 'Electronics', 'images/products/smartwatch.jpg'),
+                create_product('Wireless Earbuds', 'True wireless earbuds with active noise cancellation and 24-hour battery.', 12499.00, 30, 'Electronics', 'images/products/earbuds.jpg'),
+                create_product('Gaming Console', 'Next-gen gaming console with 1TB storage and wireless controller.', 44999.00, 8, 'Electronics', 'images/products/gaming-console.jpg'),
+                create_product('Bluetooth Speaker', 'Portable Bluetooth speaker with 360-degree sound and waterproof design.', 3499.00, 40, 'Electronics', 'images/products/bluetooth-speaker.jpg'),
+                create_product('Power Bank', '20000mAh power bank with fast charging and multiple USB ports.', 2499.00, 50, 'Electronics', 'images/products/power-bank.jpg'),
+                create_product('Webcam', 'HD webcam with built-in microphone for video calls and streaming.', 4499.00, 35, 'Electronics', 'images/products/webcam.jpg'),
+                create_product('External Hard Drive', '2TB external hard drive with USB 3.0 for fast data transfer.', 5999.00, 20, 'Electronics', 'images/products/hard-drive.jpg'),
+                create_product('Mechanical Keyboard', 'RGB mechanical keyboard with customizable switches and wrist rest.', 8999.00, 15, 'Electronics', 'images/products/keyboard.jpg'),
+                create_product('Gaming Mouse', 'High-precision gaming mouse with adjustable DPI and programmable buttons.', 3999.00, 25, 'Electronics', 'images/products/gaming-mouse.jpg'),
+                create_product('Monitor', '27-inch 4K monitor with HDR support and adjustable stand.', 29999.00, 10, 'Electronics', 'images/products/monitor.jpg'),
+                create_product('Printer', 'All-in-one wireless printer with scanner and copier functionality.', 12499.00, 12, 'Electronics', 'images/products/printer.jpg'),
+                
+                # Clothing Category (12 products)
+                create_product('T-Shirt', 'Comfortable cotton t-shirt available in multiple colors and sizes. Perfect for everyday wear.', 2249.00, 50, 'Clothing', 'images/products/tshirt.jpg'),
+                create_product('Jeans', 'High-quality denim jeans with perfect fit and durable construction. Available in various styles.', 5999.00, 30, 'Clothing', 'images/products/jeans.jpg'),
+                create_product('Formal Shirt', 'Premium cotton formal shirt suitable for office and business meetings.', 3499.00, 25, 'Clothing', 'images/products/formal-shirt.jpg'),
+                create_product('Dress', 'Elegant summer dress with floral pattern, perfect for casual and semi-formal occasions.', 4499.00, 20, 'Clothing', 'images/products/dress.jpg'),
+                create_product('Sweater', 'Warm woolen sweater for cold weather, available in multiple colors.', 3999.00, 35, 'Clothing', 'images/products/sweater.jpg'),
+                create_product('Jacket', 'Stylish leather jacket with comfortable fit and durable material.', 8999.00, 15, 'Clothing', 'images/products/jacket.jpg'),
+                create_product('Saree', 'Traditional silk saree with beautiful embroidery and elegant design.', 12499.00, 10, 'Clothing', 'images/products/saree.jpg'),
+                create_product('Kurta', 'Traditional Indian kurta with modern design, perfect for festivals and celebrations.', 2999.00, 30, 'Clothing', 'images/products/kurta.jpg'),
+                create_product('Suit', 'Professional business suit with matching trousers and jacket.', 15999.00, 12, 'Clothing', 'images/products/suit.jpg'),
+                create_product('Sneakers', 'Comfortable sneakers with cushioned sole and breathable material.', 4499.00, 40, 'Clothing', 'images/products/sneakers.jpg'),
+                create_product('Heels', 'Elegant high heels suitable for formal occasions and parties.', 3499.00, 25, 'Clothing', 'images/products/heels.jpg'),
+                create_product('Handbag', 'Stylish leather handbag with multiple compartments and adjustable strap.', 5999.00, 20, 'Clothing', 'images/products/handbag.jpg'),
+                
+                # Sports Category (8 products)
+                create_product('Running Shoes', 'Lightweight running shoes with superior comfort and excellent traction for all terrains.', 6749.00, 25, 'Sports', 'images/products/shoes.jpg'),
+                create_product('Yoga Mat', 'Non-slip yoga mat with comfortable cushioning for all types of exercises.', 1499.00, 60, 'Sports', 'images/products/yoga-mat.jpg'),
+                create_product('Dumbbells Set', 'Adjustable dumbbells set with storage rack for home workouts.', 8999.00, 15, 'Sports', 'images/products/dumbbells.jpg'),
+                create_product('Bicycle', 'Mountain bike with 21-speed gear system and durable frame.', 22499.00, 8, 'Sports', 'images/products/bicycle.jpg'),
+                create_product('Tennis Racket', 'Professional tennis racket with comfortable grip and optimal balance.', 4499.00, 20, 'Sports', 'images/products/tennis-racket.jpg'),
+                create_product('Cricket Bat', 'Premium willow cricket bat with perfect weight and balance.', 8999.00, 12, 'Sports', 'images/products/cricket-bat.jpg'),
+                create_product('Football', 'Official size football with durable outer cover and perfect bounce.', 2499.00, 30, 'Sports', 'images/products/football.jpg'),
+                create_product('Gym Bag', 'Large gym bag with multiple compartments and comfortable shoulder straps.', 1999.00, 40, 'Sports', 'images/products/gym-bag.jpg'),
+                
+                # Home & Garden Category (10 products)
+                create_product('Coffee Maker', 'Programmable coffee maker with 12-cup capacity and auto-shutoff feature for convenience.', 3749.00, 12, 'Home & Garden', 'images/products/coffee-maker.jpg'),
+                create_product('Microwave Oven', '20L microwave oven with multiple cooking modes and child lock feature.', 5999.00, 18, 'Home & Garden', 'images/products/microwave.jpg'),
+                create_product('Blender', 'High-speed blender with multiple attachments for smoothies and food processing.', 2999.00, 25, 'Home & Garden', 'images/products/blender.jpg'),
+                create_product('Toaster', '2-slice toaster with adjustable browning control and removable crumb tray.', 1999.00, 30, 'Home & Garden', 'images/products/toaster.jpg'),
+                create_product('Bed Sheet Set', 'Cotton bed sheet set with pillow covers, available in multiple colors.', 2499.00, 35, 'Home & Garden', 'images/products/bed-sheets.jpg'),
+                create_product('Pillow', 'Memory foam pillow with ergonomic design for better sleep quality.', 1499.00, 50, 'Home & Garden', 'images/products/pillow.jpg'),
+                create_product('Table Lamp', 'Modern LED table lamp with adjustable brightness and touch control.', 1999.00, 40, 'Home & Garden', 'images/products/table-lamp.jpg'),
+                create_product('Plant Pot', 'Decorative ceramic plant pot with drainage hole, perfect for indoor plants.', 899.00, 60, 'Home & Garden', 'images/products/plant-pot.jpg'),
+                create_product('Garden Tools Set', 'Complete garden tools set with storage bag for all gardening needs.', 3499.00, 20, 'Home & Garden', 'images/products/garden-tools.jpg'),
+                create_product('Vacuum Cleaner', 'Cordless vacuum cleaner with HEPA filter and multiple attachments.', 12499.00, 15, 'Home & Garden', 'images/products/vacuum-cleaner.jpg'),
+                
+                # Other Category (5 products)
+                create_product('Backpack', 'Durable backpack with multiple compartments, laptop sleeve, and water-resistant material.', 4499.00, 18, 'Other', 'images/products/backpack.jpg'),
+                create_product('Umbrella', 'Automatic umbrella with wind-resistant design and comfortable handle.', 899.00, 45, 'Other', 'images/products/umbrella.jpg'),
+                create_product('Water Bottle', 'Insulated water bottle that keeps drinks cold for 24 hours.', 1499.00, 55, 'Other', 'images/products/water-bottle.jpg'),
+                create_product('Sunglasses', 'Polarized sunglasses with UV protection and comfortable fit.', 2999.00, 30, 'Other', 'images/products/sunglasses.jpg'),
+                create_product('Wallet', 'Genuine leather wallet with multiple card slots and coin compartment.', 1999.00, 40, 'Other', 'images/products/wallet.jpg'),
+            ]
+            db.session.add_all(sample_products)
+            db.session.commit()
+            print("50 sample products added!")
+
+# Initialize database on app startup
+initialize_database()
+
 # Routes
 @app.route('/')
 def index():
@@ -742,100 +845,4 @@ def product_detail(product_id):
     return render_template('product_detail.html', product=product, related_products=related_products)
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        
-        # Create admin user if not exists
-        admin_username = os.environ.get('ADMIN_USERNAME', 'Veksha')
-        admin_email = os.environ.get('ADMIN_EMAIL', 'veksha@admin.com')
-        admin_password = os.environ.get('ADMIN_PASSWORD', 'Lucky1326')
-        
-        admin = User.query.filter_by(username=admin_username).first()
-        if not admin:
-            admin = User()
-            admin.username = admin_username
-            admin.email = admin_email
-            admin.is_admin = True
-            admin.set_password(admin_password)
-            db.session.add(admin)
-            db.session.commit()
-            print(f"Admin user created: username='{admin_username}', password='{admin_password}'")
-        
-        # Add sample products if none exist
-        if Product.query.count() == 0:
-            def create_product(name, description, price, stock, category, image_url):
-                product = Product()
-                product.name = name
-                product.description = description
-                product.price = price
-                product.stock = stock
-                product.category = category
-                product.image_url = image_url
-                return product
-            
-            sample_products = [
-                # Electronics Category (15 products)
-                create_product('Laptop', 'High-performance laptop with Intel i7 processor, 16GB RAM, and 512GB SSD. Perfect for work and gaming.', 74999.00, 10, 'Electronics', 'images/products/laptop.jpg'),
-                create_product('Smartphone', 'Latest smartphone model with 128GB storage, 6.1-inch display, and advanced camera system.', 52499.00, 15, 'Electronics', 'images/products/smartphone.jpg'),
-                create_product('Headphones', 'Wireless noise-canceling headphones with premium sound quality and 30-hour battery life.', 14999.00, 20, 'Electronics', 'images/products/headphones.jpg'),
-                create_product('Tablet', '10.1-inch tablet with 64GB storage, perfect for entertainment and productivity.', 22499.00, 12, 'Electronics', 'images/products/tablet.jpg'),
-                create_product('Smartwatch', 'Fitness tracking smartwatch with heart rate monitor and GPS.', 8999.00, 25, 'Electronics', 'images/products/smartwatch.jpg'),
-                create_product('Wireless Earbuds', 'True wireless earbuds with active noise cancellation and 24-hour battery.', 12499.00, 30, 'Electronics', 'images/products/earbuds.jpg'),
-                create_product('Gaming Console', 'Next-gen gaming console with 1TB storage and wireless controller.', 44999.00, 8, 'Electronics', 'images/products/gaming-console.jpg'),
-                create_product('Bluetooth Speaker', 'Portable Bluetooth speaker with 360-degree sound and waterproof design.', 3499.00, 40, 'Electronics', 'images/products/bluetooth-speaker.jpg'),
-                create_product('Power Bank', '20000mAh power bank with fast charging and multiple USB ports.', 2499.00, 50, 'Electronics', 'images/products/power-bank.jpg'),
-                create_product('Webcam', 'HD webcam with built-in microphone for video calls and streaming.', 4499.00, 35, 'Electronics', 'images/products/webcam.jpg'),
-                create_product('External Hard Drive', '2TB external hard drive with USB 3.0 for fast data transfer.', 5999.00, 20, 'Electronics', 'images/products/hard-drive.jpg'),
-                create_product('Mechanical Keyboard', 'RGB mechanical keyboard with customizable switches and wrist rest.', 8999.00, 15, 'Electronics', 'images/products/keyboard.jpg'),
-                create_product('Gaming Mouse', 'High-precision gaming mouse with adjustable DPI and programmable buttons.', 3999.00, 25, 'Electronics', 'images/products/gaming-mouse.jpg'),
-                create_product('Monitor', '27-inch 4K monitor with HDR support and adjustable stand.', 29999.00, 10, 'Electronics', 'images/products/monitor.jpg'),
-                create_product('Printer', 'All-in-one wireless printer with scanner and copier functionality.', 12499.00, 12, 'Electronics', 'images/products/printer.jpg'),
-                
-                # Clothing Category (12 products)
-                create_product('T-Shirt', 'Comfortable cotton t-shirt available in multiple colors and sizes. Perfect for everyday wear.', 2249.00, 50, 'Clothing', 'images/products/tshirt.jpg'),
-                create_product('Jeans', 'High-quality denim jeans with perfect fit and durable construction. Available in various styles.', 5999.00, 30, 'Clothing', 'images/products/jeans.jpg'),
-                create_product('Formal Shirt', 'Premium cotton formal shirt suitable for office and business meetings.', 3499.00, 25, 'Clothing', 'images/products/formal-shirt.jpg'),
-                create_product('Dress', 'Elegant summer dress with floral pattern, perfect for casual and semi-formal occasions.', 4499.00, 20, 'Clothing', 'images/products/dress.jpg'),
-                create_product('Sweater', 'Warm woolen sweater for cold weather, available in multiple colors.', 3999.00, 35, 'Clothing', 'images/products/sweater.jpg'),
-                create_product('Jacket', 'Stylish leather jacket with comfortable fit and durable material.', 8999.00, 15, 'Clothing', 'images/products/jacket.jpg'),
-                create_product('Saree', 'Traditional silk saree with beautiful embroidery and elegant design.', 12499.00, 10, 'Clothing', 'images/products/saree.jpg'),
-                create_product('Kurta', 'Traditional Indian kurta with modern design, perfect for festivals and celebrations.', 2999.00, 30, 'Clothing', 'images/products/kurta.jpg'),
-                create_product('Suit', 'Professional business suit with matching trousers and jacket.', 15999.00, 12, 'Clothing', 'images/products/suit.jpg'),
-                create_product('Sneakers', 'Comfortable sneakers with cushioned sole and breathable material.', 4499.00, 40, 'Clothing', 'images/products/sneakers.jpg'),
-                create_product('Heels', 'Elegant high heels suitable for formal occasions and parties.', 3499.00, 25, 'Clothing', 'images/products/heels.jpg'),
-                create_product('Handbag', 'Stylish leather handbag with multiple compartments and adjustable strap.', 5999.00, 20, 'Clothing', 'images/products/handbag.jpg'),
-                
-                # Sports Category (8 products)
-                create_product('Running Shoes', 'Lightweight running shoes with superior comfort and excellent traction for all terrains.', 6749.00, 25, 'Sports', 'images/products/shoes.jpg'),
-                create_product('Yoga Mat', 'Non-slip yoga mat with comfortable cushioning for all types of exercises.', 1499.00, 60, 'Sports', 'images/products/yoga-mat.jpg'),
-                create_product('Dumbbells Set', 'Adjustable dumbbells set with storage rack for home workouts.', 8999.00, 15, 'Sports', 'images/products/dumbbells.jpg'),
-                create_product('Bicycle', 'Mountain bike with 21-speed gear system and durable frame.', 22499.00, 8, 'Sports', 'images/products/bicycle.jpg'),
-                create_product('Tennis Racket', 'Professional tennis racket with comfortable grip and optimal balance.', 4499.00, 20, 'Sports', 'images/products/tennis-racket.jpg'),
-                create_product('Cricket Bat', 'Premium willow cricket bat with perfect weight and balance.', 8999.00, 12, 'Sports', 'images/products/cricket-bat.jpg'),
-                create_product('Football', 'Official size football with durable outer cover and perfect bounce.', 2499.00, 30, 'Sports', 'images/products/football.jpg'),
-                create_product('Gym Bag', 'Large gym bag with multiple compartments and comfortable shoulder straps.', 1999.00, 40, 'Sports', 'images/products/gym-bag.jpg'),
-                
-                # Home & Garden Category (10 products)
-                create_product('Coffee Maker', 'Programmable coffee maker with 12-cup capacity and auto-shutoff feature for convenience.', 3749.00, 12, 'Home & Garden', 'images/products/coffee-maker.jpg'),
-                create_product('Microwave Oven', '20L microwave oven with multiple cooking modes and child lock feature.', 5999.00, 18, 'Home & Garden', 'images/products/microwave.jpg'),
-                create_product('Blender', 'High-speed blender with multiple attachments for smoothies and food processing.', 2999.00, 25, 'Home & Garden', 'images/products/blender.jpg'),
-                create_product('Toaster', '2-slice toaster with adjustable browning control and removable crumb tray.', 1999.00, 30, 'Home & Garden', 'images/products/toaster.jpg'),
-                create_product('Bed Sheet Set', 'Cotton bed sheet set with pillow covers, available in multiple colors.', 2499.00, 35, 'Home & Garden', 'images/products/bed-sheets.jpg'),
-                create_product('Pillow', 'Memory foam pillow with ergonomic design for better sleep quality.', 1499.00, 50, 'Home & Garden', 'images/products/pillow.jpg'),
-                create_product('Table Lamp', 'Modern LED table lamp with adjustable brightness and touch control.', 1999.00, 40, 'Home & Garden', 'images/products/table-lamp.jpg'),
-                create_product('Plant Pot', 'Decorative ceramic plant pot with drainage hole, perfect for indoor plants.', 899.00, 60, 'Home & Garden', 'images/products/plant-pot.jpg'),
-                create_product('Garden Tools Set', 'Complete garden tools set with storage bag for all gardening needs.', 3499.00, 20, 'Home & Garden', 'images/products/garden-tools.jpg'),
-                create_product('Vacuum Cleaner', 'Cordless vacuum cleaner with HEPA filter and multiple attachments.', 12499.00, 15, 'Home & Garden', 'images/products/vacuum-cleaner.jpg'),
-                
-                # Other Category (5 products)
-                create_product('Backpack', 'Durable backpack with multiple compartments, laptop sleeve, and water-resistant material.', 4499.00, 18, 'Other', 'images/products/backpack.jpg'),
-                create_product('Umbrella', 'Automatic umbrella with wind-resistant design and comfortable handle.', 899.00, 45, 'Other', 'images/products/umbrella.jpg'),
-                create_product('Water Bottle', 'Insulated water bottle that keeps drinks cold for 24 hours.', 1499.00, 55, 'Other', 'images/products/water-bottle.jpg'),
-                create_product('Sunglasses', 'Polarized sunglasses with UV protection and comfortable fit.', 2999.00, 30, 'Other', 'images/products/sunglasses.jpg'),
-                create_product('Wallet', 'Genuine leather wallet with multiple card slots and coin compartment.', 1999.00, 40, 'Other', 'images/products/wallet.jpg'),
-            ]
-            db.session.add_all(sample_products)
-            db.session.commit()
-            print("50 sample products added!")
-    
     app.run(debug=True) 
