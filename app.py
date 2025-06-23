@@ -1,4 +1,6 @@
 import os
+import logging  # <-- Add this
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -14,11 +16,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.debug = True  # Add this line
+app.debug = True
+
+# Enable debug-level logging
+logging.basicConfig(level=logging.DEBUG)
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///ecommerce.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/images/products'
+
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
