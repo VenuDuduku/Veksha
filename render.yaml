@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: veksha-app
+    env: python
+    buildCommand: |
+      echo "python-3.10.13" > .runtime.txt
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    runtime: python
